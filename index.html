@@ -175,9 +175,20 @@
   function txt(str,attrs={}){ const t=svgEl('text',attrs); t.textContent=str; return t; }
   function defs(){ const defs=svgEl('defs'); const pat=svgEl('pattern',{id:'meshPattern',patternUnits:'userSpaceOnUse',width:10,height:10}); pat.appendChild(svgEl('rect',{width:10,height:10,fill:'#eef2f7'})); pat.appendChild(svgEl('path',{d:'M0 0L10 10M10 0L0 10',stroke:'#7d8793','stroke-width':'1'})); defs.appendChild(pat); return defs; }
 
-  function posUpper(i){ const theta=(208 - i*(236/(upper.length-1)))*Math.PI/180; const cx=380,cy=245,rx=245,ry=115; return {x:cx+rx*Math.cos(theta),y:cy-ry*Math.sin(theta),angle:(theta*180/Math.PI)-90}; }
-  function posLower(i){ const theta=(152 + i*(236/(lower.length-1)))*Math.PI/180; const cx=380,cy=760,rx=245,ry=118; return {x:cx+rx*Math.cos(theta),y:cy-ry*Math.sin(theta),angle:(theta*180/Math.PI)+90}; }
-  function posOf(id){ const ui=upper.indexOf(id); return ui>=0?{...posUpper(ui),arch:'upper'}:{...posLower(lower.indexOf(id)),arch:'lower'}; }
+  const toothLayout={
+    18:[138,326,70],17:[122,276,86],16:[123,226,92],15:[136,180,75],14:[166,140,52],13:[214,109,28],12:[280,90,12],11:[350,84,3],
+    21:[410,84,-3],22:[480,90,-12],23:[546,109,-28],24:[594,140,-52],25:[624,180,-75],26:[637,226,-92],27:[638,276,-86],28:[622,326,-70],
+    48:[138,612,110],47:[122,663,96],46:[123,714,90],45:[140,762,70],44:[176,803,48],43:[228,836,26],42:[292,857,10],41:[356,864,2],
+    31:[404,864,-2],32:[468,857,-10],33:[532,836,-26],34:[584,803,-48],35:[620,762,-70],36:[637,714,-90],37:[638,663,-96],38:[622,612,-110]
+  };
+  const labelLayout={
+    18:[64,326],17:[72,276],16:[74,226],15:[84,180],14:[118,139],13:[176,104],12:[268,66],11:[348,59],
+    21:[412,59],22:[492,66],23:[584,104],24:[642,139],25:[676,180],26:[686,226],27:[688,276],28:[696,326],
+    48:[64,612],47:[72,667],46:[74,718],45:[88,770],44:[130,812],43:[192,848],42:[286,897],41:[356,904],
+    31:[404,904],32:[474,897],33:[568,848],34:[630,812],35:[672,770],36:[686,718],37:[688,667],38:[696,612]
+  };
+  function posOf(id){ const [x,y,angle]=toothLayout[id]; return {x,y,angle,arch:upper.includes(id)?'upper':'lower'}; }
+  function labelOf(id){ const [x,y]=labelLayout[id]; return {x,y}; }
   function sideSign(id){ const p=posOf(id); return p.x<380?1:-1; }
   function sideList(v){ return v==='both'?['mesial','distal']:(v==='mesial'||v==='distal'?[v]:[]); }
   function sideX(id,side){ const s=sideSign(id); return side==='mesial'?14*s:-14*s; }
@@ -209,18 +220,18 @@
 
   function upperBase(){
     const g=svgEl('g');
-    g.appendChild(svgEl('path',{d:'M110,150 C170,105 270,88 380,88 C490,88 590,105 650,150 L650,405 C585,395 515,392 380,392 C245,392 175,395 110,405 Z',fill:'var(--palGray)'}));
-    g.appendChild(svgEl('path',{d:'M135,156 C190,118 278,102 380,102 C482,102 570,118 625,156 L625,382 C570,374 502,372 380,372 C258,372 190,374 135,382 Z',fill:'var(--pink)'}));
-    g.appendChild(svgEl('path',{d:'M380,120 C360,135 352,164 354,210 C358,204 364,196 380,191 C396,196 402,204 406,210 C408,164 400,135 380,120Z',fill:'var(--tongue)',opacity:'0.75'}));
-    g.appendChild(svgEl('path',{d:'M380,160 C342,170 318,196 304,236 M380,160 C418,170 442,196 456,236 M380,192 C350,205 333,229 322,257 M380,192 C410,205 427,229 438,257',stroke:'var(--tongue)','stroke-width':'7','stroke-linecap':'round',fill:'none',opacity:'0.75'}));
+    g.appendChild(svgEl('path',{d:'M96,150 C160,96 260,72 380,72 C500,72 600,96 664,150 L664,422 C585,414 510,410 380,410 C250,410 175,414 96,422 Z',fill:'var(--palGray)'}));
+    g.appendChild(svgEl('path',{d:'M126,150 C184,111 276,90 380,90 C484,90 576,111 634,150 L634,350 C570,336 504,330 455,348 C420,361 340,361 305,348 C256,330 190,336 126,350 Z',fill:'var(--pink)'}));
+    g.appendChild(svgEl('path',{d:'M380,110 C360,128 352,164 356,226 C360,214 368,203 380,196 C392,203 400,214 404,226 C408,164 400,128 380,110Z',fill:'var(--tongue)',opacity:'0.75'}));
+    g.appendChild(svgEl('path',{d:'M380,162 C340,174 314,206 300,255 M380,162 C420,174 446,206 460,255 M380,196 C350,212 332,241 322,279 M380,196 C410,212 428,241 438,279',stroke:'var(--tongue)','stroke-width':'7','stroke-linecap':'round',fill:'none',opacity:'0.75'}));
     return g;
   }
   function lowerBase(){
     const g=svgEl('g');
-    g.appendChild(svgEl('path',{d:'M110,520 L650,520 L650,920 L110,920 Z',fill:'#fff'}));
-    g.appendChild(svgEl('path',{d:'M300,620 C270,690 272,790 330,850',stroke:'var(--tongue)','stroke-width':'8','stroke-linecap':'round',fill:'none',opacity:'0.75'}));
-    g.appendChild(svgEl('path',{d:'M460,620 C490,690 488,790 430,850',stroke:'var(--tongue)','stroke-width':'8','stroke-linecap':'round',fill:'none',opacity:'0.75'}));
-    g.appendChild(svgEl('path',{d:'M330,850 C355,870 405,870 430,850',stroke:'var(--tongue)','stroke-width':'8','stroke-linecap':'round',fill:'none',opacity:'0.75'}));
+    g.appendChild(svgEl('path',{d:'M96,535 L664,535 L664,920 L96,920 Z',fill:'#fff'}));
+    g.appendChild(svgEl('path',{d:'M292,620 C262,690 270,795 332,858',stroke:'var(--tongue)','stroke-width':'8','stroke-linecap':'round',fill:'none',opacity:'0.75'}));
+    g.appendChild(svgEl('path',{d:'M468,620 C498,690 490,795 428,858',stroke:'var(--tongue)','stroke-width':'8','stroke-linecap':'round',fill:'none',opacity:'0.75'}));
+    g.appendChild(svgEl('path',{d:'M332,858 C358,878 402,878 428,858',stroke:'var(--tongue)','stroke-width':'8','stroke-linecap':'round',fill:'none',opacity:'0.75'}));
     return g;
   }
   function connectorUpper(){ const v=state.connectorUpper,g=svgEl('g'); if(v==='palatalStrap') g.appendChild(svgEl('path',{d:'M220 260 C285 290 475 290 540 260 C505 280 255 280 220 260Z',fill:'rgba(90,96,101,.18)',stroke:'#7a8380','stroke-width':'2'})); if(v==='apStrap'){ g.appendChild(svgEl('path',{d:'M220 232 C290 272 470 272 540 232',stroke:'#8d948f','stroke-width':'10',fill:'none','stroke-linecap':'round'})); g.appendChild(svgEl('path',{d:'M235 296 C300 320 460 320 525 296',stroke:'#8d948f','stroke-width':'10',fill:'none','stroke-linecap':'round'})); } if(v==='horseshoe') g.appendChild(svgEl('path',{d:'M225 268 C275 190 485 190 535 268',stroke:'#8d948f','stroke-width':'11',fill:'none','stroke-linecap':'round'})); if(v==='fullPlate') g.appendChild(svgEl('path',{d:'M210 220 C265 155 495 155 550 220 C520 320 240 320 210 220Z',fill:'rgba(90,96,101,.16)',stroke:'#7a8380','stroke-width':'2'})); return g; }
@@ -238,21 +249,21 @@
     chart.innerHTML=''; chart.appendChild(defs()); chart.appendChild(upperBase()); chart.appendChild(lowerBase());
     chart.appendChild(txt('Odontograma',{x:40,y:38,class:'mainTitle'}));
     chart.appendChild(txt('N° pieza',{x:95,y:78,'text-anchor':'middle',class:'sideLabel'}));
-    chart.appendChild(txt('izquierda',{x:65,y:185,'text-anchor':'middle',class:'sideLabel'}));
-    chart.appendChild(txt('derecha',{x:695,y:185,'text-anchor':'middle',class:'sideLabel'}));
-    chart.appendChild(txt('Paladar',{x:380,y:285,'text-anchor':'middle',class:'paladarLabel'}));
-    chart.appendChild(txt('Lengua',{x:380,y:705,'text-anchor':'middle',class:'lenguaLabel'}));
-    chart.appendChild(svgEl('line',{x1:380,y1:88,x2:380,y2:900,class:'midline'}));
-    chart.appendChild(svgEl('line',{x1:110,y1:500,x2:650,y2:500,class:'sep'}));
+    chart.appendChild(txt('izquierda',{x:60,y:188,'text-anchor':'middle',class:'sideLabel'}));
+    chart.appendChild(txt('derecha',{x:700,y:188,'text-anchor':'middle',class:'sideLabel'}));
+    chart.appendChild(txt('Paladar',{x:380,y:292,'text-anchor':'middle',class:'paladarLabel'}));
+    chart.appendChild(txt('Lengua',{x:380,y:725,'text-anchor':'middle',class:'lenguaLabel'}));
+    chart.appendChild(svgEl('line',{x1:380,y1:78,x2:380,y2:895,class:'midline'}));
+    chart.appendChild(svgEl('line',{x1:96,y1:515,x2:664,y2:515,class:'sep'}));
     chart.appendChild(connectorUpper()); chart.appendChild(connectorLower());
     upper.forEach(id=>{ if(!state.teeth[id].present) chart.appendChild(meshShape(id)); }); lower.forEach(id=>{ if(!state.teeth[id].present) chart.appendChild(meshShape(id)); });
     upper.forEach(id=>chart.appendChild(toothGroup(id))); lower.forEach(id=>chart.appendChild(toothGroup(id)));
-    upper.forEach(id=>{ const p=posOf(id); const isWisdom=id==='18'||id==='28'; chart.appendChild(txt(isWisdom?`(${id})`:id,{x:p.x+(p.x<380?-26:26),y:p.y+4,'text-anchor':'middle',class:'fdi'})); });
-    lower.forEach(id=>{ const p=posOf(id); const isWisdom=id==='48'||id==='38'; chart.appendChild(txt(isWisdom?`(${id})`:id,{x:p.x+(p.x<380?-26:26),y:p.y+4,'text-anchor':'middle',class:'fdi'})); });
-    chart.appendChild(txt('muela de juicio',{x:86,y:318,'text-anchor':'middle',class:'sideLabel'}));
-    chart.appendChild(txt('muela de juicio',{x:674,y:318,'text-anchor':'middle',class:'sideLabel'}));
-    chart.appendChild(txt('muela de juicio',{x:95,y:560,'text-anchor':'middle',class:'sideLabel'}));
-    chart.appendChild(txt('muela de juicio',{x:665,y:560,'text-anchor':'middle',class:'sideLabel'}));
+    upper.forEach(id=>{ const p=labelOf(id); const isWisdom=id==='18'||id==='28'; chart.appendChild(txt(isWisdom?`(${id})`:id,{x:p.x,y:p.y,'text-anchor':'middle',class:'fdi'})); });
+    lower.forEach(id=>{ const p=labelOf(id); const isWisdom=id==='48'||id==='38'; chart.appendChild(txt(isWisdom?`(${id})`:id,{x:p.x,y:p.y,'text-anchor':'middle',class:'fdi'})); });
+    chart.appendChild(txt('muela de juicio',{x:82,y:350,'text-anchor':'middle',class:'sideLabel'}));
+    chart.appendChild(txt('muela de juicio',{x:678,y:350,'text-anchor':'middle',class:'sideLabel'}));
+    chart.appendChild(txt('muela de juicio',{x:88,y:585,'text-anchor':'middle',class:'sideLabel'}));
+    chart.appendChild(txt('muela de juicio',{x:672,y:585,'text-anchor':'middle',class:'sideLabel'}));
     upper.forEach(id=>{ const m=markGroup(id); if(m) chart.appendChild(m); }); lower.forEach(id=>{ const m=markGroup(id); if(m) chart.appendChild(m); });
     updateSummary(); save();
   }
