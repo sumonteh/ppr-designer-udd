@@ -57,6 +57,8 @@
   .guide{stroke:var(--green);stroke-width:3;stroke-linecap:round;vector-effect:non-scaling-stroke}
   .indirect{fill:var(--purple);stroke:#fff;stroke-width:1.2;vector-effect:non-scaling-stroke}
   .ret{stroke:var(--red);stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+  .retSupport{fill:#384150;stroke:#fff;stroke-width:1;vector-effect:non-scaling-stroke}
+  .retPlate{fill:#64748b;stroke:#fff;stroke-width:1;opacity:.92;vector-effect:non-scaling-stroke}
   .tagBg{fill:var(--red)}
   .tag{font-size:9px;font-weight:800;fill:#fff;paint-order:stroke;stroke:rgba(0,0,0,.2);stroke-width:2}
   .paladarLabel,.lenguaLabel{font-size:26px;font-weight:500;fill:#111827}
@@ -242,7 +244,72 @@
   function drawGuide(g,id,side){ const x=sideX(id,side)*1.1; g.appendChild(svgEl('path',{d:`M${x},-8 L${x},14`,class:'guide'})); }
   function drawIndirect(g){ g.appendChild(svgEl('rect',{x:-7,y:2,width:14,height:14,rx:4,class:'indirect'})); }
   function applyRules(id){ const t=state.teeth[id]; if(t.retainerType==='nally'){ t.restPos='mesial'; if(t.retainerPos==='none') t.retainerPos='mesial'; } if(t.retainerType==='anular'){ t.restPos='both'; t.retainerPos='both'; } if(t.retainerType==='doble'){ t.restPos='both'; t.retainerPos='both'; } if(t.retainerType==='semi'){ t.restType='cingulum'; if(t.restPos==='none') t.restPos='mesial'; if(t.retainerPos==='none') t.retainerPos='mesial'; } if(t.retainerType==='roach'){ if(t.restPos==='none') t.restPos='mesial'; if(t.retainerPos==='none') t.retainerPos='mesial'; } if(t.retainerType==='rpi'){ t.restPos='mesial'; t.guidePos='distal'; t.retainerPos='mesial'; } }
-  function drawRetainer(g,id,t){ const rt=t.retainerType; if(rt==='none') return; const side=t.retainerPos==='none'?'mesial':t.retainerPos; const sides=side==='both'?['mesial','distal']:[side]; if(rt==='acker'){ sides.forEach(s=>{ const x=sideX(id,s); g.appendChild(svgEl('path',{d:`M${x*0.2},14 C${x*0.9},10 ${x*0.9},-10 ${x*0.15},-16`,class:'ret'})); g.appendChild(svgEl('path',{d:`M${-x*0.1},8 C${x*0.15},1 ${x*0.2},-6 ${x*0.2},-13`,class:'ret'})); }); addTag(g,'AK'); return; } if(rt==='nally'){ const x=sideX(id,'mesial'); g.appendChild(svgEl('path',{d:`M${-x*0.2},14 C${-x},6 ${-x},-14 ${x*0.2},-18 C${x},-14 ${x},8 ${x*0.2},16`,class:'ret'})); addTag(g,'NM'); return; } if(rt==='anular'){ g.appendChild(svgEl('path',{d:'M-2,16 C-18,10 -18,-14 -2,-18 C18,-22 24,-2 16,14 C12,20 6,22 0,20',class:'ret'})); g.appendChild(svgEl('path',{d:'M5,-15 C14,-12 14,8 5,14',class:'ret'})); addTag(g,'AN'); return; } if(rt==='doble'){ g.appendChild(svgEl('path',{d:'M-3,-1 C-18,-8 -18,-20 -5,-20',class:'ret'})); g.appendChild(svgEl('path',{d:'M3,-1 C18,-8 18,-20 5,-20',class:'ret'})); g.appendChild(svgEl('path',{d:'M-3,1 C-18,8 -18,20 -5,20',class:'ret'})); g.appendChild(svgEl('path',{d:'M3,1 C18,8 18,20 5,20',class:'ret'})); addTag(g,'DB'); return; } if(rt==='semi'){ const s=sides[0]||'mesial'; const x=sideX(id,s); g.appendChild(svgEl('path',{d:`M${x*0.1},14 C${x*0.8},12 ${x*0.85},-10 ${x*0.15},-14`,class:'ret'})); addTag(g,'SA'); return; } if(rt==='roach'){ const s=sides[0]||'mesial'; const x=sideX(id,s); g.appendChild(svgEl('path',{d:`M${x*1.1},22 C${x*1.05},12 ${x*0.8},3 ${x*0.45},-1 C${x*0.25},-3 ${x*0.1},-2 0,-1`,class:'ret'})); addTag(g,'I'); return; } if(rt==='rpi'){ const xm=sideX(id,'mesial'), xd=sideX(id,'distal'); g.appendChild(svgEl('path',{d:`M${xm*1.1},22 C${xm*1.05},12 ${xm*0.8},3 ${xm*0.45},-1 C${xm*0.25},-3 ${xm*0.1},-2 0,-1`,class:'ret'})); g.appendChild(svgEl('path',{d:`M${xd*1.05},-8 L${xd*1.05},14`,class:'guide'})); addTag(g,'RPI'); return; } }
+  function retSupport(g,x,y,rx=6,ry=8){ g.appendChild(svgEl('ellipse',{cx:x,cy:y,rx,ry,class:'retSupport'})); }
+  function retPlate(g,x,y,w=10,h=20){ g.appendChild(svgEl('rect',{x:x-w/2,y:y-h/2,width:w,height:h,rx:3,class:'retPlate'})); }
+  function drawRetainer(g,id,t){
+    const rt=t.retainerType;
+    if(rt==='none') return;
+    const side=t.retainerPos==='none'?'mesial':t.retainerPos;
+    const sides=side==='both'?['mesial','distal']:[side];
+    if(rt==='acker'){
+      sides.forEach(s=>{
+        const dir=sideX(id,s)>0?1:-1;
+        g.appendChild(svgEl('path',{d:`M${-18*dir},-17 C${-25*dir},-6 ${-24*dir},10 ${-9*dir},18 C${-1*dir},22 ${11*dir},21 ${21*dir},13`,class:'ret'}));
+        g.appendChild(svgEl('path',{d:`M${19*dir},-17 C${25*dir},-5 ${24*dir},8 ${15*dir},17`,class:'ret'}));
+        retSupport(g,0,12,6,8);
+      });
+      addTag(g,'AK');
+      return;
+    }
+    if(rt==='nally'){
+      const dir=sideX(id,'mesial')>0?1:-1;
+      g.appendChild(svgEl('path',{d:`M${-18*dir},-18 C${-27*dir},-5 ${-24*dir},13 ${-8*dir},21 C${8*dir},29 ${24*dir},14 ${19*dir},-2 C${17*dir},-10 ${10*dir},-16 ${2*dir},-18`,class:'ret'}));
+      retSupport(g,-3*dir,-17,7,8);
+      addTag(g,'NM');
+      return;
+    }
+    if(rt==='anular'){
+      g.appendChild(svgEl('path',{d:'M-18,-15 C-30,0 -24,22 -5,25 C15,28 30,11 24,-8 C21,-18 12,-24 1,-23',class:'ret'}));
+      g.appendChild(svgEl('path',{d:'M12,-20 C25,-12 27,9 15,20',class:'ret'}));
+      retSupport(g,-8,-18,6,8);
+      retSupport(g,0,17,6,8);
+      addTag(g,'AN');
+      return;
+    }
+    if(rt==='doble'){
+      g.appendChild(svgEl('path',{d:'M-4,-2 C-18,-7 -25,-18 -16,-26 C-7,-35 1,-19 0,-4',class:'ret'}));
+      g.appendChild(svgEl('path',{d:'M4,-2 C18,-7 25,-18 16,-26 C7,-35 -1,-19 0,-4',class:'ret'}));
+      g.appendChild(svgEl('path',{d:'M-4,2 C-18,7 -25,18 -16,26 C-7,35 1,19 0,4',class:'ret'}));
+      g.appendChild(svgEl('path',{d:'M4,2 C18,7 25,18 16,26 C7,35 -1,19 0,4',class:'ret'}));
+      retSupport(g,0,-5,6,12);
+      retSupport(g,0,8,6,12);
+      addTag(g,'DB');
+      return;
+    }
+    if(rt==='semi'){
+      const dir=sideX(id,sides[0]||'mesial')>0?1:-1;
+      g.appendChild(svgEl('path',{d:`M${-18*dir},-19 C${-27*dir},-5 ${-24*dir},14 ${-7*dir},22 C${2*dir},26 ${12*dir},24 ${20*dir},16`,class:'ret'}));
+      retSupport(g,13*dir,13,5,10);
+      addTag(g,'SA');
+      return;
+    }
+    if(rt==='roach'){
+      const dir=sideX(id,sides[0]||'mesial')>0?1:-1;
+      g.appendChild(svgEl('path',{d:`M${24*dir},30 C${24*dir},17 ${18*dir},9 ${8*dir},5 C${1*dir},2 ${-4*dir},-2 ${-6*dir},-8`,class:'ret'}));
+      g.appendChild(svgEl('path',{d:`M${-6*dir},-8 C${2*dir},-19 ${14*dir},-20 ${20*dir},-9`,class:'ret'}));
+      addTag(g,'I');
+      return;
+    }
+    if(rt==='rpi'){
+      const xm=sideX(id,'mesial'), xd=sideX(id,'distal'), dir=xm>0?1:-1;
+      retSupport(g,xm*0.45,-14,6,7);
+      retPlate(g,xd*0.65,7,9,24);
+      g.appendChild(svgEl('path',{d:`M${xm*1.4},28 C${xm*1.25},16 ${xm*0.9},8 ${xm*0.38},2 C${xm*0.15},0 ${xm*0.03},-2 0,-4`,class:'ret'}));
+      g.appendChild(svgEl('path',{d:`M${-20*dir},-11 C${-10*dir},-20 ${3*dir},-18 ${8*dir},-8`,class:'ret'}));
+      addTag(g,'RPI');
+      return;
+    }
+  }
   function markGroup(id){ const t=state.teeth[id]; if(!t.present) return null; applyRules(id); const p=posOf(id); const g=svgEl('g',{transform:`translate(${p.x} ${p.y}) rotate(${p.angle})`}); sideList(t.restPos).forEach(s=>drawSupport(g,id,s,t.restType)); sideList(t.guidePos).forEach(s=>drawGuide(g,id,s)); if(t.indirect) drawIndirect(g); drawRetainer(g,id,t); return g; }
 
   function render(){
